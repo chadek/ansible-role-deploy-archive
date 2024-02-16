@@ -23,3 +23,5 @@ deploy_archive_conf: {
   filename: "{{ deploy_archive_app_name }}.conf",
   permission: "0644"
 }
+
+new_var: "toto"
