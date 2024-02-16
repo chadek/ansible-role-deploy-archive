@@ -13,7 +13,7 @@ env:
 
 defaults:
   run:
-    working-directory: ${{ env.APP_NAME }}
+    working-directory: chadek.deploy_archive
 
 jobs:
   lint:
