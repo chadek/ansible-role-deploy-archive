@@ -17,6 +17,8 @@
        ternary('sha256:' + deploy_archive_src.checksum, omit) }}
     dest: "{{ deploy_archive_dest }}/{{ deploy_archive_src.archive_name }}"
     mode: '0644'
+  tags:
+    - molecule-idempotence-notest
 
 - name: Deploy archive | unarchive
   ansible.builtin.unarchive:
@@ -31,6 +33,8 @@
   ansible.builtin.file:
     path: "{{ deploy_archive_dest }}/{{ deploy_archive_src.archive_name }}"
     state: absent
+  tags:
+    - molecule-idempotence-notest
 
 - name: Deploy archive | Deploy config
   ansible.builtin.template:
