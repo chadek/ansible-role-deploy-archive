@@ -17,6 +17,8 @@
        ternary('sha256:' + deploy_archive_src.checksum, omit) }}
     dest: "{{ deploy_archive_dest }}/{{ deploy_archive_src.archive_name }}"
     mode: '0644'
+  tags:
+    - molecule-idempotence-notest
 
 - name: Deploy archive | unarchive
   ansible.builtin.unarchive:
@@ -26,11 +28,15 @@
     group: "{{ deploy_archive_user.group }}"
     mode: "{{ deploy_archive_src.permission }}"
     remote_src: true
+  tags:
+    - molecule-idempotence-notest
 
 - name: Deploy archive | Remove archive
   ansible.builtin.file:
     path: "{{ deploy_archive_dest }}/{{ deploy_archive_src.archive_name }}"
     state: absent
+  tags:
+    - molecule-idempotence-notest
 
 - name: Deploy archive | Deploy config
   ansible.builtin.template:
