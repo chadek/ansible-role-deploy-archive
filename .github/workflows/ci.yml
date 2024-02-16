@@ -1,0 +1,69 @@
+---
+name: CI
+"on":
+  pull_request:
+  push:
+    branches:
+      - master
+  schedule:
+    - cron: "30 4 * * 1"
+
+env:
+  APP_NAME: chadek.deploy_archive
+
+defaults:
+  run:
+    working-directory: "${{ env.APP_NAME }}"
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the codebase.
+        uses: actions/checkout@v4
+        with:
+          path: "${{ env.APP_NAME }}"
+
+      - name: Set up Python 3.
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install test dependencies.
+        run: pip3 install yamllint ansible-lint
+
+      - name: Lint code.
+        run: |
+          yamllint .
+          ansible-lint .
+
+  molecule:
+    name: Molecule
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        distro:
+          - rockylinux9
+          - ubuntu2210
+
+    steps:
+      - name: Check out the codebase.
+        uses: actions/checkout@v4
+        with:
+          path: "${{ env.APP_NAME }}"
+
+      - name: Set up Python 3.
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install test dependencies.
+        run: pip3 install ansible molecule molecule-plugins[docker] docker
+
+      - name: Run Molecule tests.
+        run: molecule test
+        env:
+          PY_COLORS: "1"
+          ANSIBLE_FORCE_COLOR: "1"
+          MOLECULE_DISTRO: ${{ matrix.distro }}

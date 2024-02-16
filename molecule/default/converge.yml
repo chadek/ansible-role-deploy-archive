@@ -1,0 +1,28 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+
+  pre_tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 600
+      when: ansible_os_family == 'Debian'
+      changed_when: false
+
+  vars:
+    deploy_archive_user: {
+      name: root,
+      group: root,
+    }
+    deploy_archive_src: {
+      url: "https://github.com/chadek/ansible-role-zammad/archive/refs/tags/1.0.0.tar.gz",
+      checksum: "f02ef26932ad1b2b1e5f0f07dec8a4737c21189d555f7f576303696585dca09d",
+      archive_name: "toto",
+      permission: "0755"
+    }
+  tasks:
+    - name: "Include deploy_archive"
+      ansible.builtin.include_role:
+        name: "chadek.deploy_archive"
