@@ -19,7 +19,6 @@ galaxy_info:
         - focal
 
   galaxy_tags:
-    - deploy_archive
-    - deploy_asset
     - deploy
     - asset
+    - archive
