@@ -1,48 +1,11 @@
 ---
-# tasks file for deploy-archive
+- name: Deploy archive | Include setup_asset.yml
+  ansible.builtin.include_tasks: setup_asset.yml
 
-- name: Deploy archive | create directory
-  ansible.builtin.file:
-    path: "{{ deploy_archive_dest }}"
-    state: directory
-    owner: "{{ deploy_archive_user.name }}"
-    group: "{{ deploy_archive_user.group }}"
-    mode: '0755'
+- name: Deploy archive | Include crontab.yml
+  ansible.builtin.include_tasks: crontab.yml
+  when: deploy_archive_cron is defined
 
-- name: Deploy archive | Download
-  ansible.builtin.get_url:
-    url: "{{ deploy_archive_src.url }}"
-    checksum: >-
-      {{ (deploy_archive_src.checksum | length > 0) |
-       ternary('sha256:' + deploy_archive_src.checksum, omit) }}
-    dest: "{{ deploy_archive_dest }}/{{ deploy_archive_src.archive_name }}"
-    mode: '0644'
-  tags:
-    - molecule-idempotence-notest
-
-- name: Deploy archive | unarchive
-  ansible.builtin.unarchive:
-    src: "{{ deploy_archive_dest }}/{{ deploy_archive_src.archive_name }}"
-    dest: "{{ deploy_archive_dest }}"
-    owner: "{{ deploy_archive_user.name }}"
-    group: "{{ deploy_archive_user.group }}"
-    mode: "{{ deploy_archive_src.permission }}"
-    remote_src: true
-  tags:
-    - molecule-idempotence-notest
-
-- name: Deploy archive | Remove archive
-  ansible.builtin.file:
-    path: "{{ deploy_archive_dest }}/{{ deploy_archive_src.archive_name }}"
-    state: absent
-  tags:
-    - molecule-idempotence-notest
-
-- name: Deploy archive | Deploy config
-  ansible.builtin.template:
-    src: "config.j2"
-    dest: "{{ deploy_archive_conf.path }}/{{ deploy_archive_conf.filename }}"
-    owner: "{{ deploy_archive_user.name }}"
-    group: "{{ deploy_archive_user.group }}"
-    mode: "{{ deploy_archive_conf.permission }}"
-  when: deploy_archive_conf_content is defined
+- name: Deploy archive | Include systemd.yml
+  ansible.builtin.include_tasks: systemd.yml
+  when: deploy_archive_systemd_content is defined
