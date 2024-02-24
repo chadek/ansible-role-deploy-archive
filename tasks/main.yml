@@ -1,4 +1,7 @@
 ---
+- name: Deploy archive | Populate service facts
+  ansible.builtin.service_facts:
+
 - name: Deploy archive | Include setup_asset.yml
   ansible.builtin.include_tasks: setup_asset.yml
 
