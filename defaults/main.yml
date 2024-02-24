@@ -28,14 +28,13 @@ deploy_archive_conf:
     filename: "{{ deploy_archive_app_name }}.conf",
     permission: "0644",
   }
-
 # deploy_archive_cron:
 #   {
 #     day: "*",
 #     hour: "20",
 #     minute: "58",
 #     job: "python3 {{ deploy_archive_dest }}/{{ deploy_archive_app_name}} --conf {{ deploy_archive_dest }}/{{ deploy_archive_conf.filename }}"
-#   } 
+#   }
 
 # deploy_archive_systemd_content: |
 #   "[Unit]
@@ -51,4 +50,3 @@ deploy_archive_conf:
 
 #   [Install]
 #   WantedBy=multi-user.target"
-  
