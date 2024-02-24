@@ -1,0 +1,9 @@
+---
+- name: Deploy archive | Writing cronjob
+  ansible.builtin.cron:
+    name: "Cronjob for {{ deploy_archive_app_name }}"
+    day: "{{ deploy_archive_cron.day }}"
+    hour: "{{ deploy_archive_cron.hour }}"
+    minute: "{{ deploy_archive_cron.minute }}"
+    user: "{{ deploy_archive_user.name }}"
+    job: "{{ deploy_archive_cron.job }}"

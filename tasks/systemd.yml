@@ -1,0 +1,7 @@
+---
+- name: Deploy archive | Setup systemd file
+  ansible.builtin.copy:
+    content: "{{ deploy_archive_systemd_content }}"
+    dest: "/etc/systemd/system/{{ deploy_archive_app_name }}.service"
+    mode: "0644"
+  notify: "Daemon reload service"
