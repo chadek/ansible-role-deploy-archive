@@ -1,0 +1,5 @@
+---
+- name: Deploy Archive | Run additional command
+  ansible.builtin.command: {{ deploy_archive_cmd }}
+  register: output
+  changed_when: output.rc != 0
