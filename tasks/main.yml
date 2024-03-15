@@ -5,6 +5,10 @@
 - name: Deploy archive | Include setup_asset.yml
   ansible.builtin.include_tasks: setup_asset.yml
 
+- name: Deploy archive | Include cmd.yml
+  ansible.builtin.include_tasks: systemd.yml
+  when: deploy_archive_cmd is defined
+  
 - name: Deploy archive | Include crontab.yml
   ansible.builtin.include_tasks: crontab.yml
   when: deploy_archive_cron is defined
