@@ -5,5 +5,5 @@
     day: "{{ deploy_archive_cron.day }}"
     hour: "{{ deploy_archive_cron.hour }}"
     minute: "{{ deploy_archive_cron.minute }}"
-    user: "{{ deploy_archive_user.name }}"
+    user: "{{ deploy_archive_appuser.name }}"
     job: "{{ deploy_archive_cron.job }}"

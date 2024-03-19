@@ -3,8 +3,8 @@
   ansible.builtin.file:
     path: "{{ deploy_archive_dest }}"
     state: directory
-    owner: "{{ deploy_archive_user.name }}"
-    group: "{{ deploy_archive_user.group }}"
+    owner: "{{ deploy_archive_appuser.name }}"
+    group: "{{ deploy_archive_appuser.group }}"
     mode: '0755'
 
 - name: Deploy archive | Download
@@ -22,8 +22,8 @@
   ansible.builtin.unarchive:
     src: "{{ deploy_archive_dest }}/{{ deploy_archive_src.archive_name }}"
     dest: "{{ deploy_archive_dest }}"
-    owner: "{{ deploy_archive_user.name }}"
-    group: "{{ deploy_archive_user.group }}"
+    owner: "{{ deploy_archive_appuser.name }}"
+    group: "{{ deploy_archive_appuser.group }}"
     mode: "{{ deploy_archive_asset_permission }}"
     remote_src: true
   tags:
@@ -40,8 +40,8 @@
   ansible.builtin.template:
     src: "config.j2"
     dest: "{{ deploy_archive_conf.path }}/{{ deploy_archive_conf.filename }}"
-    owner: "{{ deploy_archive_user.name }}"
-    group: "{{ deploy_archive_user.group }}"
+    owner: "{{ deploy_archive_appuser.name }}"
+    group: "{{ deploy_archive_appuser.group }}"
     mode: "{{ deploy_archive_conf.permission }}"
   when: deploy_archive_conf_content is defined
   notify: Restart systemd service
