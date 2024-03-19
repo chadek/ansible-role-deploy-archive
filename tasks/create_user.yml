@@ -1,0 +1,10 @@
+---
+- name: Deploy_archive | Create user to run daemon "{{ deploy_archive_appuser.name }}"
+  ansible.builtin.user:
+    name: "{{ deploy_archive_appuser.name }}"
+    shell: "{{ deploy_archive_appuser.shell }}"
+    home: "{{ deploy_archive_dest }}"
+    system: true
+    create_home: true
+    state: present
+    comment: "User to run leila app"
