@@ -4,15 +4,17 @@ deploy_archive_app_name: "appname"
 deploy_archive_conf_content: |
   "some nice config file
   multiline "example" with 'weird'
-  special problematic caracters" r
+  special problematic caracters"
 
 deploy_archive_dest: "/opt/{{ deploy_archive_app_name }}"
 deploy_archive_asset_permission: "0644"
 
-deploy_archive_user:
+deploy_archive_create_user: true
+deploy_archive_appuser:
   {
     name: "{{ deploy_archive_app_name }}",
     group: "{{ deploy_archive_app_name }}",
+    shell: "/bin/sh"
   }
 
 deploy_archive_src:
