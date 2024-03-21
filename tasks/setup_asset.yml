@@ -16,6 +16,19 @@
     dest: "{{ deploy_archive_dest }}/{{ deploy_archive_src.archive_name }}"
     headers: "{{ deploy_archive_get_url_headers }}"
     mode: '0644'
+  when: deploy_archive_src.url is defined
+  tags:
+    - molecule-idempotence-notest
+
+- name: Deploy archive | Upload local archive
+  ansible.builtin.copy:
+    src: "{{ deploy_archive_src.path }}"
+    checksum: >-
+      {{ (deploy_archive_src.checksum | length > 0) |
+       ternary('sha256:' + deploy_archive_src.checksum, omit) }}
+    dest: "{{ deploy_archive_dest }}/{{ deploy_archive_src.archive_name }}"
+    mode: '0644'
+  when: deploy_archive_src.path is defined
   tags:
     - molecule-idempotence-notest
 
