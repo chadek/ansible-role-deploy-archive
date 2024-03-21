@@ -21,14 +21,13 @@ deploy_archive_src:
   {
     url: "test.net",
     archive_name: "{{ deploy_archive_app_name }}.tar.gz",
-    checksum: somechecksum,
+    checksum: "somechecksum"
   }
 
 deploy_archive_conf:
   {
     path: "{{ deploy_archive_dest }}",
-    filename: "{{ deploy_archive_app_name }}.conf",
-    permission: "0644",
+    filename: "{{ deploy_archive_app_name }}.conf"
   }
 # deploy_archive_cron:
 #   {
