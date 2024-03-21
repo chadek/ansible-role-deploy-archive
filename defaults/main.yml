@@ -8,7 +8,7 @@ deploy_archive_conf_content: |
 
 deploy_archive_dest: "/opt/{{ deploy_archive_app_name }}"
 deploy_archive_asset_permission: "0644"
-
+deploy_archive_get_url_headers: {}
 deploy_archive_create_user: true
 deploy_archive_appuser:
   {
