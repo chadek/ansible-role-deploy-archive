@@ -38,7 +38,6 @@
     dest: "{{ deploy_archive_dest }}"
     owner: "{{ deploy_archive_appuser.name }}"
     group: "{{ deploy_archive_appuser.group }}"
-    mode: "{{ deploy_archive_asset_permission }}"
     remote_src: true
   tags:
     - molecule-idempotence-notest
