@@ -25,7 +25,7 @@
     src: "{{ deploy_archive_src.path }}"
     checksum: >-
       {{ (deploy_archive_src.checksum | length > 0) |
-       ternary('sha256:' + deploy_archive_src.checksum, omit) }}
+       ternary(deploy_archive_src.checksum, omit) }}
     dest: "{{ deploy_archive_dest }}/{{ deploy_archive_src.archive_name }}"
     mode: '0644'
   when: deploy_archive_src.path is defined
