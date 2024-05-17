@@ -2,8 +2,14 @@
 - name: Deploy archive | Populate service facts
   ansible.builtin.service_facts:
 
+- name: Deploy archive | Install dependencies (unzip)
+  ansible.builtin.package:
+    name: unzip
+    state: present
+
 - name: Deploy archive | Include create_user.yml
   ansible.builtin.include_tasks: create_user.yml
+  when: deploy_archive_create_user is true
 
 - name: Deploy archive | Include setup_asset.yml
   ansible.builtin.include_tasks: setup_asset.yml
