@@ -29,6 +29,9 @@ deploy_archive_conf:
     filename: "{{ deploy_archive_app_name }}.conf",
     permission: "0644"
   }
+
+deploy_archive_systemd_restart: false
+
 # deploy_archive_cron:
 #   {
 #     day: "*",
