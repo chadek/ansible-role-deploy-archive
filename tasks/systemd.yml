@@ -10,4 +10,4 @@
   ansible.builtin.systemd:
     name: "{{ deploy_archive_app_name }}"
     state: restarted
-  when: "deploy_archive_app_name.endswith('.service') in ansible_facts.services and deploy_archive_systemd_restart is true"
+  when: "deploy_archive_app_name.endswith('.service') in ansible_facts.services"
