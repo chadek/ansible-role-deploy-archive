@@ -5,3 +5,9 @@
     state: restarted
     enabled: true
     daemon_reload: true
+
+- name: Restart systemd service
+  ansible.builtin.systemd:
+    name: "{{ deploy_archive_app_name }}"
+    state: restarted
+  when: "deploy_archive_app_name.endswith('.service') in ansible_facts.services"
