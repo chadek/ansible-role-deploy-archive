@@ -5,3 +5,9 @@
     dest: "/etc/systemd/system/{{ deploy_archive_app_name }}.service"
     mode: "0644"
   notify: "Daemon reload service"
+
+- name: Deploy archive | Restart systemd service
+  ansible.builtin.systemd:
+    name: "{{ deploy_archive_app_name }}"
+    state: restarted
+  when: "deploy_archive_app_name.endswith('.service') in ansible_facts.services"
