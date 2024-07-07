@@ -57,4 +57,3 @@
     group: "{{ deploy_archive_appuser.group }}"
     mode: "{{ deploy_archive_conf.permission }}"
   when: deploy_archive_conf_content is defined
-  notify: Restart systemd service
