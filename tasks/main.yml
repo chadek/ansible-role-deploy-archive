@@ -3,9 +3,10 @@
   ansible.builtin.service_facts:
 
 - name: Deploy archive | Install dependencies (unzip)
-  ansible.builtin.package:
+  ansible.builtin.apt:
     name: unzip
     state: present
+    update_cache: true
 
 - name: Deploy archive | Include create_user.yml
   ansible.builtin.include_tasks: create_user.yml
