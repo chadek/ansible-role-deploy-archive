@@ -7,7 +7,6 @@ deploy_archive_conf_content: |
   special problematic caracters"
 
 deploy_archive_dest: "/opt/{{ deploy_archive_app_name }}"
-deploy_archive_home: "{{ deploy_archive_dest }}"
 deploy_archive_get_url_headers: {}
 deploy_archive_create_user: true
 deploy_archive_appuser:
@@ -15,6 +14,7 @@ deploy_archive_appuser:
     name: "{{ deploy_archive_app_name }}",
     group: "{{ deploy_archive_app_name }}",
     shell: "/bin/sh",
+    home: "{{ deploy_archive_dest }}"
     comment: "User to run {{ deploy_archive_app_name }}"
   }
 
