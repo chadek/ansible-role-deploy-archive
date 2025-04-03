@@ -1,10 +1,6 @@
 ---
 # defaults file for deploy-archive
 deploy_archive_app_name: "appname"
-deploy_archive_conf_content: |
-  "some nice config file
-  multiline "example" with 'weird'
-  special problematic caracters"
 
 deploy_archive_dest: "/opt/{{ deploy_archive_app_name }}"
 deploy_archive_get_url_headers: {}
@@ -25,6 +21,9 @@ deploy_archive_src:
     checksum: "somechecksum"
   }
 
+  
+deploy_archive_systemd_restart: false
+
 deploy_archive_conf:
   {
     path: "{{ deploy_archive_dest }}",
@@ -32,8 +31,13 @@ deploy_archive_conf:
     permission: "0644"
   }
 
-deploy_archive_systemd_restart: false
+# Define this variable to activate define the content of a config file
+# deploy_archive_conf_content: |
+#   "some nice config file
+#   multiline "example" with 'weird'
+#   special problematic caracters"
 
+# Define this variable to setup a crontab
 # deploy_archive_cron:
 #   {
 #     day: "*",
@@ -42,6 +46,7 @@ deploy_archive_systemd_restart: false
 #     job: "python3 {{ deploy_archive_dest }}/{{ deploy_archive_app_name}} --conf {{ deploy_archive_dest }}/{{ deploy_archive_conf.filename }}"
 #   }
 
+# Define this variable to setup a systemd file
 # deploy_archive_systemd_content: |
 #   "[Unit]
 #   Description=Some systemd service
