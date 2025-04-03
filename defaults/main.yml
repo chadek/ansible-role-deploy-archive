@@ -15,6 +15,7 @@ deploy_archive_appuser:
     name: "{{ deploy_archive_app_name }}",
     group: "{{ deploy_archive_app_name }}",
     shell: "/bin/sh"
+    comment: "User to run {{ deploy_archive_app_name }}"
   }
 
 deploy_archive_src:
