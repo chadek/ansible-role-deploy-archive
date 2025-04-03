@@ -3,8 +3,8 @@
   ansible.builtin.user:
     name: "{{ deploy_archive_appuser.name }}"
     shell: "{{ deploy_archive_appuser.shell }}"
-    home: "{{ deploy_archive_home }}"
+    home: "{{ deploy_archive_appuser.home }}"
     system: true
     create_home: true
     state: present
-    comment: "User to run leila app"
+    comment: "{{ deploy_archive_appuser.comment }}"
