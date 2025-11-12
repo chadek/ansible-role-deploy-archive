@@ -26,4 +26,4 @@
   tasks:
     - name: "Include deploy_archive"
       ansible.builtin.include_role:
-        name: "chadek.deploy_archive"
+        name: "ansible-role-deploy-archive"

@@ -7,3 +7,10 @@
   ansible.builtin.package:
     name: unzip
     state: present
+
+- name: Deploy archive | Install user dependencies
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  when: deploy_archive_dependencies is defined
+  loop: "{{ deploy_archive_dependencies }}"

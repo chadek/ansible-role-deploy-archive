@@ -21,7 +21,6 @@ deploy_archive_src:
     checksum: "somechecksum"
   }
 
-  
 deploy_archive_systemd_restart: false
 
 deploy_archive_conf:
@@ -36,6 +35,9 @@ deploy_archive_conf:
 #   "some nice config file
 #   multiline "example" with 'weird'
 #   special problematic caracters"
+
+# Define this variable to install some dependencies you might have
+# deploy_archive_dependencies: [python3-testing, some_other_package]
 
 # Define this variable to setup a crontab
 # deploy_archive_cron:
