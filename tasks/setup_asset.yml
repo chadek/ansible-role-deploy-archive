@@ -5,7 +5,7 @@
     state: directory
     owner: "{{ deploy_archive_appuser.name }}"
     group: "{{ deploy_archive_appuser.group }}"
-    mode: '0755'
+    mode: "0755"
 
 - name: Deploy archive | Download
   ansible.builtin.get_url:
@@ -15,7 +15,7 @@
        ternary('sha256:' + deploy_archive_src.checksum, omit) }}
     dest: "{{ deploy_archive_dest }}/{{ deploy_archive_src.archive_name }}"
     headers: "{{ deploy_archive_get_url_headers }}"
-    mode: '0644'
+    mode: "0644"
   when: deploy_archive_src.url is defined
   tags:
     - molecule-idempotence-notest
@@ -27,7 +27,7 @@
       {{ (deploy_archive_src.checksum | length > 0) |
        ternary(deploy_archive_src.checksum, omit) }}
     dest: "{{ deploy_archive_dest }}/{{ deploy_archive_src.archive_name }}"
-    mode: '0644'
+    mode: "0644"
   when: deploy_archive_src.path is defined
   tags:
     - molecule-idempotence-notest
@@ -39,6 +39,18 @@
     owner: "{{ deploy_archive_appuser.name }}"
     group: "{{ deploy_archive_appuser.group }}"
     remote_src: true
+  tags:
+    - molecule-idempotence-notest
+
+- name: Deploy archive | Set directory permissions
+  ansible.builtin.command: "find {{ deploy_archive_dest }} -type d -exec chmod {{ deploy_archive_dest_permissions.folder_permission }} {} +"
+  when: deploy_archive_dest_permissions is defined
+  tags:
+    - molecule-idempotence-notest
+
+- name: Deploy archive | Set file permissions
+  ansible.builtin.command: "find {{ deploy_archive_dest }} -type f -exec chmod {{ deploy_archive_dest_permissions.file_permission }} {} +"
+  when: deploy_archive_dest_permissions is defined
   tags:
     - molecule-idempotence-notest
 
