@@ -44,11 +44,13 @@
 
 - name: Deploy archive | Set directory permissions
   ansible.builtin.command: "find {{ deploy_archive_dest }} -type d -exec chmod {{ deploy_archive_dest_permissions.folder_permission }} {} +"
+  when: deploy_archive_dest_permissions is defined
   tags:
     - molecule-idempotence-notest
 
 - name: Deploy archive | Set file permissions
   ansible.builtin.command: "find {{ deploy_archive_dest }} -type f -exec chmod {{ deploy_archive_dest_permissions.file_permission }} {} +"
+  when: deploy_archive_dest_permissions is defined
   tags:
     - molecule-idempotence-notest
 

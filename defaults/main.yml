@@ -3,8 +3,7 @@
 deploy_archive_app_name: "appname"
 
 deploy_archive_dest: "/opt/{{ deploy_archive_app_name }}"
-deploy_archive_dest_permissions:
-  { folder_permission: "0755", file_permission: "0644" }
+
 deploy_archive_get_url_headers: {}
 deploy_archive_create_user: true
 deploy_archive_appuser:
@@ -36,6 +35,10 @@ deploy_archive_conf:
 #   "some nice config file
 #   multiline "example" with 'weird'
 #   special problematic caracters"
+
+# Define this variable to recursively set permissions on deployed files
+# deploy_archive_dest_permissions:
+#   { folder_permission: "0755", file_permission: "0644" }
 
 # Define this variable to install some dependencies you might have
 # deploy_archive_dependencies: [python3-testing, some_other_package]
