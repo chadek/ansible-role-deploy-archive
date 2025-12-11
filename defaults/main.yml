@@ -3,6 +3,8 @@
 deploy_archive_app_name: "appname"
 
 deploy_archive_dest: "/opt/{{ deploy_archive_app_name }}"
+deploy_archive_dest_permissions:
+  { folder_permission: "0755", file_permission: "0644" }
 deploy_archive_get_url_headers: {}
 deploy_archive_create_user: true
 deploy_archive_appuser:
@@ -11,14 +13,14 @@ deploy_archive_appuser:
     group: "{{ deploy_archive_app_name }}",
     shell: "/bin/sh",
     home: "{{ deploy_archive_dest }}",
-    comment: "User to run {{ deploy_archive_app_name }}"
+    comment: "User to run {{ deploy_archive_app_name }}",
   }
 
 deploy_archive_src:
   {
     url: "test.net",
     archive_name: "{{ deploy_archive_app_name }}.tar.gz",
-    checksum: "somechecksum"
+    checksum: "somechecksum",
   }
 
 deploy_archive_systemd_restart: false
@@ -27,9 +29,8 @@ deploy_archive_conf:
   {
     path: "{{ deploy_archive_dest }}",
     filename: "{{ deploy_archive_app_name }}.conf",
-    permission: "0644"
+    permission: "0644",
   }
-
 # Define this variable to activate define the content of a config file
 # deploy_archive_conf_content: |
 #   "some nice config file
