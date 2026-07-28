@@ -1,2 +1,28 @@
 ---
 # vars file for deploy-archive
+
+# Destination without its trailing slashes, so paths can be compared and
+# concatenated whatever the consumer wrote in deploy_archive_dest.
+deploy_archive_dest_root: "{{ deploy_archive_dest | regex_replace('/+$', '') }}"
+
+# Absolute path of the config file managed by this role.
+deploy_archive_conf_fullpath: "{{ deploy_archive_conf.path | regex_replace('/+$', '') }}/{{ deploy_archive_conf.filename }}"
+
+# Directory the archive is extracted into: the destination itself for the
+# "overlay" strategy, the staging directory for the "sync" one.
+deploy_archive_extract_dir: >-
+  {{ (deploy_archive_strategy == 'sync')
+     | ternary(deploy_archive_stage_dir, deploy_archive_dest) }}
+
+# Paths the "sync" strategy must never delete: the uploaded archive, the config
+# file this role deploys (when it lives inside the destination) and whatever the
+# consumer asked to keep, ie. runtime state that is not shipped in the archive.
+deploy_archive_protected_paths: >-
+  {{ ['/' ~ deploy_archive_src.archive_name]
+     + (['/' ~ (deploy_archive_conf_fullpath | relpath(deploy_archive_dest_root))]
+        if deploy_archive_conf_fullpath.startswith(deploy_archive_dest_root ~ '/')
+        else [])
+     + deploy_archive_keep }}
+
+deploy_archive_rsync_opts: >-
+  {{ deploy_archive_protected_paths | map('regex_replace', '^', '--exclude=') | list }}

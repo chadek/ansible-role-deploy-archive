@@ -32,25 +32,137 @@
   tags:
     - molecule-idempotence-notest
 
+# Syncing a staging directory that sits inside the destination would make rsync
+# recurse into its own source, and --delete would then eat the release.
+- name: Deploy archive | Check the staging directory sits outside the destination
+  ansible.builtin.assert:
+    that: not deploy_archive_stage_dir.startswith(deploy_archive_dest_root ~ '/')
+    fail_msg: >-
+      deploy_archive_stage_dir ({{ deploy_archive_stage_dir }}) must live outside
+      of deploy_archive_dest ({{ deploy_archive_dest }}).
+  when: deploy_archive_strategy == 'sync'
+
+# A leftover staging directory means a previous run died between extraction and
+# sync: its content cannot be trusted, so start from an empty one.
+- name: Deploy archive | Reset staging directory
+  ansible.builtin.file:
+    path: "{{ deploy_archive_stage_dir }}"
+    state: absent
+  when: deploy_archive_strategy == 'sync'
+  tags:
+    - molecule-idempotence-notest
+
+- name: Deploy archive | Create staging directory
+  ansible.builtin.file:
+    path: "{{ deploy_archive_stage_dir }}"
+    state: directory
+    owner: "{{ deploy_archive_appuser.name }}"
+    group: "{{ deploy_archive_appuser.group }}"
+    mode: "0755"
+  when: deploy_archive_strategy == 'sync'
+  tags:
+    - molecule-idempotence-notest
+
 - name: Deploy archive | unarchive
   ansible.builtin.unarchive:
     src: "{{ deploy_archive_dest }}/{{ deploy_archive_src.archive_name }}"
-    dest: "{{ deploy_archive_dest }}"
+    dest: "{{ deploy_archive_extract_dir }}"
     owner: "{{ deploy_archive_appuser.name }}"
     group: "{{ deploy_archive_appuser.group }}"
     remote_src: true
   tags:
     - molecule-idempotence-notest
 
+# Applied to the extracted tree: that is the destination itself with the
+# "overlay" strategy, and the staging directory with the "sync" one, where rsync
+# then carries the modes over without touching the kept runtime state.
 - name: Deploy archive | Set directory permissions
-  ansible.builtin.command: "find {{ deploy_archive_dest }} -type d -exec chmod {{ deploy_archive_dest_permissions.folder_permission }} {} +"
+  ansible.builtin.command: "find {{ deploy_archive_extract_dir }} -type d -exec chmod {{ deploy_archive_dest_permissions.folder_permission }} {} +"
   when: deploy_archive_dest_permissions is defined
   tags:
     - molecule-idempotence-notest
 
 - name: Deploy archive | Set file permissions
-  ansible.builtin.command: "find {{ deploy_archive_dest }} -type f -exec chmod {{ deploy_archive_dest_permissions.file_permission }} {} +"
+  ansible.builtin.command: "find {{ deploy_archive_extract_dir }} -type f -exec chmod {{ deploy_archive_dest_permissions.file_permission }} {} +"
   when: deploy_archive_dest_permissions is defined
+  tags:
+    - molecule-idempotence-notest
+
+- name: Deploy archive | List staged content
+  ansible.builtin.find:
+    paths: "{{ deploy_archive_stage_dir }}"
+    file_type: any
+    hidden: true
+  register: deploy_archive_staged
+  when: deploy_archive_strategy == 'sync'
+  tags:
+    - molecule-idempotence-notest
+
+# Guard rail: syncing an empty staging directory would wipe the destination.
+- name: Deploy archive | Refuse to sync an empty release
+  ansible.builtin.assert:
+    that: deploy_archive_staged.files | length > 0
+    fail_msg: >-
+      {{ deploy_archive_src.archive_name }} extracted to nothing, refusing to
+      rsync --delete an empty release into {{ deploy_archive_dest }}.
+  when: deploy_archive_strategy == 'sync'
+  tags:
+    - molecule-idempotence-notest
+
+# delegate_to the target itself so rsync runs locally on it, from the staging
+# directory to the destination. It runs as deploy_archive_appuser rather than
+# root: --delete can then only reach what that user is allowed to unlink, so a
+# misconfigured destination cannot take root owned files down with it. owner and
+# group are dropped from --archive accordingly, an unprivileged rsync cannot
+# chown, and it does not need to: the staging tree is extracted as the app user.
+- name: Deploy archive | Sync release into destination
+  ansible.posix.synchronize:
+    src: "{{ deploy_archive_stage_dir }}/"
+    dest: "{{ deploy_archive_dest_root }}/"
+    archive: true
+    delete: true
+    compress: false
+    owner: false
+    group: false
+    rsync_opts: "{{ deploy_archive_rsync_opts }}"
+  delegate_to: "{{ inventory_hostname }}"
+  become: true
+  become_user: "{{ deploy_archive_appuser.name }}"
+  vars:
+    # deploy_archive_appuser.home defaults to deploy_archive_dest, and Ansible
+    # puts the module it runs under the become user's home: that would drop an
+    # .ansible directory inside the very tree we are about to rsync --delete.
+    ansible_remote_tmp: "/tmp/.ansible-{{ deploy_archive_appuser.name }}"
+  register: deploy_archive_rsync
+  # Itemized lines starting with a dot are attribute only updates (directory
+  # mtimes mostly, which move as soon as kept state is written next to the
+  # release): only transfers and deletions make the deployment changed. The
+  # default([]) keeps a failing rsync from being reported as a broken
+  # conditional instead of the error it actually hit.
+  changed_when: deploy_archive_rsync.stdout_lines | default([]) | reject('match', '\.') | list | length > 0
+  when: deploy_archive_strategy == 'sync'
+  tags:
+    - molecule-idempotence-notest
+
+# Deletions are the destructive part of the sync, so surface them without
+# having to re-run the whole deployment in verbose mode.
+- name: Deploy archive | Report the paths removed from the destination
+  ansible.builtin.debug:
+    msg: "{{ deploy_archive_rsync_deleted }}"
+  vars:
+    deploy_archive_rsync_deleted: >-
+      {{ deploy_archive_rsync.stdout_lines | default([]) | select('match', '\*deleting') | list }}
+  when:
+    - deploy_archive_strategy == 'sync'
+    - deploy_archive_rsync_deleted | length > 0
+  tags:
+    - molecule-idempotence-notest
+
+- name: Deploy archive | Remove staging directory
+  ansible.builtin.file:
+    path: "{{ deploy_archive_stage_dir }}"
+    state: absent
+  when: deploy_archive_strategy == 'sync'
   tags:
     - molecule-idempotence-notest
 
@@ -64,7 +176,7 @@
 - name: Deploy archive | Deploy config
   ansible.builtin.template:
     src: "config.j2"
-    dest: "{{ deploy_archive_conf.path }}/{{ deploy_archive_conf.filename }}"
+    dest: "{{ deploy_archive_conf_fullpath }}"
     owner: "{{ deploy_archive_appuser.name }}"
     group: "{{ deploy_archive_appuser.group }}"
     mode: "{{ deploy_archive_conf.permission }}"

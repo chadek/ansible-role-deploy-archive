@@ -30,6 +30,26 @@ deploy_archive_conf:
     filename: "{{ deploy_archive_app_name }}.conf",
     permission: "0644",
   }
+
+# How the archive content is put in place:
+#   overlay: extract on top of the existing tree. Files that disappeared from
+#            the archive are left behind on the target (historic behaviour).
+#   sync:    extract into a staging directory then rsync --delete it into
+#            deploy_archive_dest, so the destination ends up matching the
+#            archive exactly, except for the paths in deploy_archive_keep.
+deploy_archive_strategy: "overlay"
+
+# rsync exclude patterns protected from --delete when deploy_archive_strategy
+# is "sync". Patterns follow rsync semantics and are relative to
+# deploy_archive_dest: a leading "/" anchors the pattern to the root of the
+# destination ("/backend/node_modules"), without it the pattern matches at any
+# depth ("node_modules"). The uploaded archive and the config file managed by
+# this role are protected automatically.
+deploy_archive_keep: []
+
+# Staging directory used by the "sync" strategy. It MUST live outside of
+# deploy_archive_dest, and is removed once the sync succeeded.
+deploy_archive_stage_dir: "{{ deploy_archive_dest_root }}.deploy-stage"
 # Define this variable to activate define the content of a config file
 # deploy_archive_conf_content: |
 #   "some nice config file

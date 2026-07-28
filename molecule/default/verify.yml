@@ -8,3 +8,63 @@
     - name: Example assertion
       ansible.builtin.assert:
         that: true
+
+- name: Verify the sync strategy
+  hosts: sync
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Stat the paths the sync strategy is expected to act on
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      register: deploy_archive_verify
+      loop:
+        - "/opt/appname/orphan-from-previous-release.txt"
+        - "/opt/appname/orphan-from-second-release.txt"
+        - "/opt/appname/state/keepme.txt"
+        - "/opt/appname/appname.conf"
+        - "/opt/appname.deploy-stage"
+        - "/opt/appname/toto"
+
+    - name: Both leftovers are gone, kept state and config are still there
+      ansible.builtin.assert:
+        that:
+          - not deploy_archive_verify.results[0].stat.exists
+          - not deploy_archive_verify.results[1].stat.exists
+          - deploy_archive_verify.results[2].stat.exists
+          - deploy_archive_verify.results[3].stat.exists
+          - not deploy_archive_verify.results[4].stat.exists
+          - not deploy_archive_verify.results[5].stat.exists
+        fail_msg: >-
+          sync strategy misbehaved:
+          {{ deploy_archive_verify.results
+             | map(attribute='item') | zip(deploy_archive_verify.results
+             | map(attribute='stat.exists')) | list }}
+
+    - name: Read the config file inode recorded before the second release
+      ansible.builtin.slurp:
+        src: "/opt/appname/state/conf-inode-before"
+      register: deploy_archive_verify_inode
+
+    - name: The config file was never deleted and recreated by the sync
+      ansible.builtin.assert:
+        that:
+          - deploy_archive_verify.results[3].stat.inode | string
+            == deploy_archive_verify_inode.content | b64decode
+        fail_msg: >-
+          appname.conf inode changed
+          ({{ deploy_archive_verify_inode.content | b64decode }} ->
+          {{ deploy_archive_verify.results[3].stat.inode }}): the sync deleted it
+          instead of excluding it.
+
+    - name: The archive content did land in the destination
+      ansible.builtin.find:
+        paths: "/opt/appname"
+        patterns: "ansible-role-zammad-*"
+        file_type: directory
+      register: deploy_archive_verify_content
+
+    - name: Assert the release is in place
+      ansible.builtin.assert:
+        that: deploy_archive_verify_content.files | length > 0
+        fail_msg: "the extracted release is missing from /opt/appname"
