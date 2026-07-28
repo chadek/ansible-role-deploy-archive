@@ -12,6 +12,33 @@
       when: ansible_os_family == 'Debian'
       changed_when: false
 
+    # Simulate a previous release that shipped files the new archive does not
+    # contain any more, next to runtime state that must survive the deployment.
+    # Tagged like the deployment tasks themselves: the idempotence run skips both,
+    # otherwise it would plant the leftover again after the sync removed it.
+    - name: Create the directory holding the runtime state to keep
+      ansible.builtin.file:
+        path: "/opt/appname/state"
+        state: directory
+        mode: "0755"
+      when: deploy_archive_strategy | default('overlay') == 'sync'
+      changed_when: false
+      tags:
+        - molecule-idempotence-notest
+
+    - name: Plant a leftover file and some runtime state
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: touch
+        mode: "0644"
+      loop:
+        - "/opt/appname/orphan-from-previous-release.txt"
+        - "/opt/appname/state/keepme.txt"
+      when: deploy_archive_strategy | default('overlay') == 'sync'
+      changed_when: false
+      tags:
+        - molecule-idempotence-notest
+
   vars:
     deploy_archive_user: {
       name: root,

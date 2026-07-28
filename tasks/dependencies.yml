@@ -8,6 +8,16 @@
     name: unzip
     state: present
 
+# acl is what lets Ansible hand the sync module over to an unprivileged
+# become_user when the connection user is not root either.
+- name: Deploy archive | Install dependencies (rsync, acl)
+  ansible.builtin.package:
+    name:
+      - rsync
+      - acl
+    state: present
+  when: deploy_archive_strategy == 'sync'
+
 - name: Deploy archive | Install user dependencies
   ansible.builtin.package:
     name: "{{ item }}"
